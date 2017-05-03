@@ -1,0 +1,44 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-web-ui
+  namespace: kube-system
+spec:
+  selector:
+    k8s-app: traefik-ingress-lb
+  type: NodePort
+  ports:
+  - name: admin
+    port: 8081
+    nodePort: 30082
+---
+#apiVersion: extensions/v1beta1
+#kind: Ingress
+#metadata:
+#  name: traefik-web-ui
+#  namespace: kube-system
+#  annotations:
+#    traefik.frontend.rule.type: pathprefixstrip
+#spec:
+#  rules:
+#  - http:
+#      paths:
+#      - path: /traefik
+#        backend:
+#          serviceName: traefik-web-ui
+#          servicePort: admin
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: traefik-web-ui
+  namespace: kube-system
+spec:
+  rules:
+  - host: traefik.kube.local
+    http:
+      paths:
+      -  backend:
+          serviceName: traefik-web-ui
+          servicePort: admin

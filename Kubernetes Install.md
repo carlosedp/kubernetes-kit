@@ -112,9 +112,21 @@ klog() {
     kubectl logs -f --namespace=${NS} ${PODNAME}
 }
 
+## Watch pods
+
+    wpod() {
+        NS=$@
+        NAMESPACE=${NS:-"--all-namespaces"}
+        if [ "$NAMESPACE" != "--all-namespaces" ]
+          then
+          NAMESPACE="-n ${NS}"
+        fi
+
+        watch kubectl get pods $NAMESPACE
+    }
+
 ## Kubernetes Pods commands
 
-alias wpods='watch kubectl get pods --all-namespaces'
 alias ksvc='kubectl get services --all-namespaces'
 alias kpod='kubectl get pods --all-namespaces'
 alias kedp='kubectl get endpoints --all-namespaces'

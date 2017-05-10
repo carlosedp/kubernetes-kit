@@ -81,7 +81,6 @@ spec:
         - name: admin
           containerPort: 8081
         args:
-#        - -d
         - --web
         - --web.address=:8081
         - --kubernetes
@@ -95,7 +94,7 @@ metadata:
   labels:
     k8s-app: traefik-ingress-lb
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
     - port: 80
       nodePort: 30080

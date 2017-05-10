@@ -79,8 +79,9 @@
     `kubectl taint nodes --all node-role.kubernetes.io/master-`
 * Deploy Kubernetes Dashboard, Dashboard ingress
 * Deploy Heapster
-* Deploy Ingress Controller Traefik and Traefik-ui
-* Create LoadBalancer for the Traefik Ingress (Input on floatingIP port 80. Out to all nodes port 30080)
+* Configure Openstack Load Balancer
+* Deploy Ingress Controller Traefik and Traefik-ui (it creates own LB)
+* Deploy NFS StorageClass
 * Deploy Rook
     kubectl apply -f https://raw.githubusercontent.com/rook/rook/master/demo/kubernetes/rook-operator.yaml
     kubectl apply -f https://raw.githubusercontent.com/rook/rook/master/demo/kubernetes/rook-cluster.yaml
@@ -97,7 +98,49 @@
 ### References:
 * [https://github.com/luxas/kubeadm-workshop](https://github.com/luxas/kubeadm-workshop)
 
-----------------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+## Install on Openstack Heat (openrc)
+
+sudo pip install python-openstackclient
+sudo pip install python-heatclient
+sudo pip install python-swiftclient
+sudo pip install python-glanceclient
+sudo pip install python-novaclient
+
+    export OS_USERNAME=admin
+    export OS_PASSWORD=admin
+    export OS_TENANT_NAME=admin
+    export OS_TENANT_ID=?????????????
+    export OS_PROJECT_NAME=admin
+    export OS_DEFAULT_DOMAIN=default
+    export OS_AUTH_URL=http://public.fuel.local:5000/v2.0
+    export OS_REGION_NAME=RegionOne
+    export STACK_NAME=KubernetesStack
+    #
+    # Kubernetes options
+    #
+    export NUMBER_OF_MINIONS=2
+    export MAX_NUMBER_OF_MINIONS=5
+    export MASTER_FLAVOR=m1.medium
+    export MINION_FLAVOR=m1.medium
+    export EXTERNAL_NETWORK=admin_floating_net
+    export DNS_SERVER=8.8.8.8
+    export CREATE_IMAGE=false
+    export IMAGE_ID:???????????????????
+    export OPENSTACK_IMAGE_NAME=CentOS-7-x86_64-GenericCloud-1611.vmdk
+    export IMAGE_FILE=CentOS-7-x86_64-GenericCloud-1611.vmdk
+    export SWIFT_SERVER_URL=http://public.fuel.local:8080
+    export ENABLE_PROXY=false
+    export LBAAS_VERSION=v2
+
+## Start deploy:
+
+    cd kubernetes # Or whichever path you have extracted the release to
+    KUBERNETES_PROVIDER=openstack-heat ./cluster/kube-up.sh
+
+------------------------------------------------------------------------------
+
 
 ## Kubernetes log
 klog() {
@@ -131,6 +174,10 @@ alias ksvc='kubectl get services --all-namespaces'
 alias kpod='kubectl get pods --all-namespaces'
 alias kedp='kubectl get endpoints --all-namespaces'
 
+
+## Set default StorageClass
+    kubectl patch storageclass managed-nfs-storage -p '{"metadata":{"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
+
 ## Kubernetes install Weavescope
 
 Install nsenter and socat on all nodes:
@@ -148,17 +195,6 @@ kubectl apply -f weavescope.yaml
     * Enable LBAAS v2 on Openstack
     * Configure kube-apiserver and kube-controller-manager to load openstack integration
 
-Add to `/etc/kubernetes/manifests/kube-apiserver.yaml` on master node
-
-    - --cloud-provider=openstack
-    - --cloud-config=/etc/kubernetes/openstack.conf
-
-
-Add to `/etc/kubernetes/manifests/kube-controller-manager.yaml` on master node
-
-    - --cloud-provider=openstack
-    - --cloud-config=/etc/kubernetes/openstack.conf
-
 Create /etc/kubernetes/openstack.conf
 
     [Global]
@@ -174,48 +210,22 @@ Create /etc/kubernetes/openstack.conf
     [Route]
     router-id=353f74ce-68b5-40db-b1a5-1793fe3be839
 
-### Example APP with loadbalancer:
+Add to `/etc/kubernetes/manifests/kube-apiserver.yaml` on master node (end of parameters)
 
-Create nginx.yaml:
+    - --cloud-provider=openstack
+    - --cloud-config=/etc/kubernetes/openstack.conf
 
-    apiVersion: v1
-    kind: Pod
-    metadata:
-      name: nginx
-      labels:
-       app: nginx
-    spec:
-      containers:
-      - name: nginx
-        image: nginx
-        ports:
-        - containerPort: 80
 
-Create nginx-svc.yaml:
+Add to `/etc/kubernetes/manifests/kube-controller-manager.yaml` on master node(start of parameters)
 
-    apiVersion: v1
-    kind: Service
-    metadata:
-      name: nginxservice
-      labels:
-        app: nginx
-    spec:
-      ports:
-      - port: 80 88
-        targetPort: 80
-        protocol: TCP
-      selector:
-        app: nginx
-      type: LoadBalancer
+    - --cloud-provider=openstack
+    - --cloud-config=/etc/kubernetes/openstack.conf
 
-Load services:
+Follow logs:
 
-     kubectl create -f nginx.yaml
-     kubectl create -f nginx-svc.yaml
-
-## Allow scheduling on master
-    kubectl taint nodes --all node-role.kubernetes.io/master-
+    journalctl -r -u kubelet
 
 ## Fix permission for RBAC (Not to be used)
     kubectl create clusterrolebinding add-on-cluster-account --clusterrole=cluster-admin --serviceaccount=default:default
+
 

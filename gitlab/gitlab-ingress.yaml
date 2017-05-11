@@ -1,0 +1,13 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: gitlab-http
+  namespace: default
+spec:
+  rules:
+  - host: gitlab.kube.local
+    http:
+      paths:
+      -  backend:
+          serviceName: gitlab-gitlab-ce
+          servicePort: http

@@ -1,0 +1,13 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: jenkins-ui
+  namespace: default
+spec:
+  rules:
+  - host: jenkins.kube.local
+    http:
+      paths:
+      -  backend:
+          serviceName: jenkins-jenkins
+          servicePort: http

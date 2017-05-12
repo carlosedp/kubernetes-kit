@@ -3,7 +3,7 @@ apiVersion: v1
 metadata:
   name: nfs-busybox
 spec:
-  storageClassName: managed-nfs-storage
+  storageClassName: default
   accessModes:
     - ReadWriteMany
   resources:
@@ -15,7 +15,7 @@ kind: ReplicationController
 metadata:
   name: nfs-busybox
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     name: nfs-busybox
   template:

@@ -79,9 +79,10 @@
     `kubectl taint nodes --all node-role.kubernetes.io/master-`
 * Deploy Kubernetes Dashboard, Dashboard ingress
 * Deploy Heapster
+* Add local DNS server to DNS deployment (kubedns args `--nameservers=10.178.11.220`)
 * Configure Openstack Load Balancer
 * Deploy Ingress Controller Traefik and Traefik-ui (it creates own LB)
-* Deploy NFS StorageClass
+* Deploy NFS StorageClass (NFS server must have no_root_squash)
 * Deploy Rook
     kubectl apply -f https://raw.githubusercontent.com/rook/rook/master/demo/kubernetes/rook-operator.yaml
     kubectl apply -f https://raw.githubusercontent.com/rook/rook/master/demo/kubernetes/rook-cluster.yaml

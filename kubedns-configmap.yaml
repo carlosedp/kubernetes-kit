@@ -5,8 +5,6 @@ metadata:
   namespace: kube-system
 data:
   stubDomains: |
-    [{“kube.local”: [“10.178.11.220”]},
-    {“kubelocal.com”: [“10.178.11.220”]}]
+    {"kube.local": ["10.178.11.220"]}
   upstreamNameservers: |
-    [“10.178.11.220”]
-
+    ["10.178.11.220"]

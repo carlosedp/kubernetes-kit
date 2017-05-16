@@ -79,7 +79,7 @@
     `kubectl taint nodes --all node-role.kubernetes.io/master-`
 * Deploy Kubernetes Dashboard, Dashboard ingress
 * Deploy Heapster
-* Add local DNS server to DNS deployment (kubedns args `--nameservers=10.178.11.220`)
+* Add local DNS server to DNS deployment (kubedns args `--nameservers=10.178.11.220`) or load `kubedns-configmap.yaml`
 * Configure Openstack Load Balancer
 * Deploy Ingress Controller Traefik and Traefik-ui (it creates own LB)
 * Deploy NFS StorageClass (NFS server must have no_root_squash)

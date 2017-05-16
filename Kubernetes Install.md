@@ -227,6 +227,9 @@ Follow logs:
     journalctl -r -u kubelet
 
 ## Fix permission for RBAC (Not to be used)
+
+    kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --user=admin --user=kubelet --group=system:serviceaccounts
+
     kubectl create clusterrolebinding add-on-cluster-account --clusterrole=cluster-admin --serviceaccount=default:default
 
 

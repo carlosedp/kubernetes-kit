@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
         - name: graphite
-          image: nickstenning/graphite
+          image: carlosedp/docker-graphite
           ports:
           - containerPort: 80
             name: http
@@ -28,10 +28,16 @@ spec:
           volumeMounts:
           - name: graphite-pv
             mountPath: /var/lib/graphite/storage/whisper
+          - name: graphite-supervisord
+            mountPath: /etc/supervisor/conf.d/supervisord.conf
+            subPath: supervisord.conf
       volumes:
         - name: graphite-pv
           persistentVolumeClaim:
             claimName: graphite-pvc
+        - name: graphite-supervisord
+          configMap:
+            name: graphite-supervisord.conf
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1

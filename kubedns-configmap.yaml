@@ -4,7 +4,7 @@ metadata:
   name: kube-dns
   namespace: kube-system
 data:
-  stubDomains: |
-    {"kube.local": ["10.178.11.220"]}
+#  stubDomains: |
+#    {"kube.local": ["10.178.11.220"]}
   upstreamNameservers: |
     ["10.178.11.220"]

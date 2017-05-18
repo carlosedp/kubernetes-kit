@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: monitoring-grafana
+  annotations:
+    traefik.frontend.rule.type: pathprefixstrip
+spec:
+  rules:
+  - host: grafana.kube.com
+    http:
+      paths:
+      -  backend:
+          serviceName: grafana-grafana
+          servicePort: http

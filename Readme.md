@@ -2,88 +2,46 @@
 
 ## Building a multi-platform Kubernetes cluster with kubeadm
 
+### Install Kubernetes
+
 * Create 3 CentOS 1611 machines (1 master, 2 nodes)
 * Install using ansible playbook from [https://github.com/ReSearchITEng/kubeadm-playbook](https://github.com/ReSearchITEng/kubeadm-playbook)
 * Add hosts to `hosts` file
 * Configure group_vars:
-
-    # global variables
-    # proxy environment variable, mainly for fetching addons
-    proxy_env:
-      http_proxy: ""
-      https_proxy: ""
-      no_proxy: ""
-
-    # first uninstall any kube* package from all hosts
+    ```
     full_kube_reinstall: False
-
-    # Desired state for the yum packages (docker, kube*); it defaults to latest, trying to upgrade every time.
-    package_state: latest # Other valid options for this context: present
-
-    # Desired kubernetes_version, e.g. 'v1.6.1'  ; when not defined, defaults to: 'latest'
-    kubernetes_version: v1.6.2
-
-    # Any kubeadm init extra params can be put here. The var must exist, even if it's empty.
-    # e.g. for using flannel, one must put: --pod-network-cidr='10.244.0.0/16'
-    #kubeadm_init_extra_params: "--pod-network-cidr='10.244.0.0/16'"
-    kubeadm_init_extra_params: ""
-
-    # service_dns_domain: "myk8s.corp.example.com" # (cluster.local is the default, if not defined)
+    package_state: installed
+    kubernetes_version: 'v1.6.2'
+    kubeadm_init_extra_params: "--pod-network-cidr='10.244.0.0/16'"
     service_dns_domain: "kube.local"
-
     apiserver_cert_extra_sans: api.kube.local,10.178.11.236,kube.local
-
-    # kube-apiserver_extra_params
-    # Values are here: https://kubernetes.io/docs/admin/kube-apiserver/
-    # ansible will update them on the master, here: /etc/kubernetes/manifests/kube-apiserver.yaml, after the "- kube-apiserver" line
-    # Note the spaces in front, as it must match with the /etc/kubernetes/manifests/kube-apiserver.yaml
     kube_apiserver_extra_params:
       - '    - --service-node-port-range=79-32767' #Default 32000-32767
-
-    #If you want to be able to schedule pods on the master
-    #It's useful if it's a single-machine Kubernetes cluster for development (replacing minikube), set it to true
     use_master_as_node_also: true
-
-    ### Network addons. More details: https://kubernetes.io/docs/admin/addons/
-    # Calico:
-    #kubeadm_network_addons_urls:
-    #  - http://docs.projectcalico.org/v2.1/getting-started/kubernetes/installation/hosted/kubeadm/1.6/calico.yaml
-
-    # Weave
-    kubeadm_network_addons_urls:
-       - https://git.io/weave-kube-1.6
-
-    # Flannel:
-    #kubeadm_network_addons_urls:
-    #  - https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel-rbac.yml
-    #  - https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-
+    k8s_network_addons_urls:
+      - https://git.io/weave-kube-1.6
     helm:
       install_script_url: 'https://github.com/kubernetes/helm/raw/master/scripts/get'
       repos:
         - { name: fabric8, url: 'https://fabric8.io/helm' }
-      packages_list: #when not defined, namespace defaults to "default" namespace
-    #    - { name: nginx-ingress, repo: stable/nginx-ingress, namespace: kube-system, options: '--set controller.stats.enabled=true --set controller.service.type=NodePort --set controller.service.nodePorts.http=80 --set controller.service.nodePorts.https=443' }
-    #    - { name: prometheus, repo: stable/prometheus, namespace: kube-system, options: '' }
-
-    # kubeadm_docker_insecure_registry: registry.example.com:5000
-
-    # Static token (generated on the fly if not set). Alphanum strings with lengths: 6.16
-    # kubeadm_token: secret.token4yourbyok8s
-
-    # shell for bash-completion for kubeadm and kubectl; currently only bash is fully supported, others only partially.
+    kubeadm_token: secret.token4yourbyok8s
     shell: 'bash'
+    ```
 
-
-* Taint the master node
+* Taint the master node (If not done in the playbook)
     `kubectl taint nodes --all node-role.kubernetes.io/master-`
-* Deploy Kubernetes Dashboard, Dashboard ingress
-* Deploy Heapster
+    `kubectl taint nodes --all dedicated-`
+
+### Install addons
+
+* Deploy Kubernetes Dashboard, Dashboard ingress (from dashboard dir)
+* Deploy Heapster (from dashboard dir)
 * Add local DNS server to DNS deployment (kubedns args `--nameservers=10.178.11.220`) or load `kubedns-configmap.yaml`
-* Configure Openstack Load Balancer
-* Deploy Ingress Controller Traefik and Traefik-ui (it creates own LB)
-* Deploy NFS StorageClass (NFS server must have no_root_squash)
-* Deploy Rook
+* Check if Openstack Load Balancer is available. Enable integration.
+* Deploy Ingress Controller Traefik and Traefik-ui from traefik dir (it creates own LB)
+* Install Helm (if not installed by playbook)
+* Deploy NFS StorageClass from nfs-storageclass dir (NFS server must have no_root_squash)
+* Deploy Rook (optional for Ceph storage across all nodes)
     kubectl apply -f https://raw.githubusercontent.com/rook/rook/master/demo/kubernetes/rook-operator.yaml
     kubectl apply -f https://raw.githubusercontent.com/rook/rook/master/demo/kubernetes/rook-cluster.yaml
     kubectl apply -f https://raw.githubusercontent.com/rook/rook/master/demo/kubernetes/rook-storageclass.yaml
@@ -91,13 +49,29 @@
     kubectl get secret rook-rook-user -oyaml | sed "/resourceVer/d;/uid/d;/self/d;/creat/d;/namespace/d" | kubectl -n kube-system apply -f -
     # In order to make Rook the default Storage Provider by making the `rook-block` Storage Class the default, run this:
     kubectl patch storageclass rook-block -p '{"metadata":{"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
+* Deploy Cinder StorageClass from cinder-storageclass dir (depends on Kubernetes 1.7)
+* Deploy InfluxDB from influx-grafana dir (influx.yaml)
+* Deploy Grafana from Helm chart:
+    `helm install --name grafana --set server.serviceType=NodePort --set server.persistentVolume.enabled=false --set server.installPlugins=raintank-kubernetes-app --set server.adminPassword=admin stable/grafana`
+* Deploy Grafana Kubernetes app
+    - Deploy Graphite mointoring db (graphite dir dep/svc)
+    - Create a Graphite datasource (http://graphite.default.svc.kube.local:80)
+    - Configure Kubernetes Grafana App
+      ```
+      - Go to the Cluster List page via the Kubernetes app menu.
+      - Click the New Cluster button.
+      - Fill in the Auth details for your cluster (ca.crt, apiserver-kubelet-client.crt and apiserver-kubelet-client.key from /etc/kubernetes/pki/)
+      - Choose the Graphite datasource that will be used for reading data in the dashboards.
+      - Fill in the details for the Carbon host that is used to write to Graphite. This url has to be available from inside the cluster.
+      - Click Deploy. This will deploy a DaemonSet, to collect health metrics for every node, and a pod that collects cluster metrics.
+      ```
 
-* Deploy InfluxDB and Grafana
-* Install Helm
-* Deploy Service Catalog
+* Deploy Weavescope from weavescope dir (optional)
 
 ### References:
 * [https://github.com/luxas/kubeadm-workshop](https://github.com/luxas/kubeadm-workshop)
+* [https://github.com/ReSearchITEng/kubeadm-playbook](https://github.com/ReSearchITEng/kubeadm-playbook)
+* [https://github.com/grafana/kubernetes-app](https://github.com/grafana/kubernetes-app)
 
 ------------------------------------------------------------------------------
 
@@ -142,8 +116,10 @@ sudo pip install python-novaclient
 
 ------------------------------------------------------------------------------
 
+# Command Aliases/Funtions
 
-## Kubernetes log
+source <(kubectl completion bash)
+
 klog() {
     POD=$1
     INPUT_INDEX=$2
@@ -156,20 +132,28 @@ klog() {
     kubectl logs -f --namespace=${NS} ${PODNAME}
 }
 
-## Watch pods
+wpod() {
+    NS=$@
+    NAMESPACE=${NS:-"--all-namespaces"}
+    if [ "$NAMESPACE" != "--all-namespaces" ]
+      then
+      NAMESPACE="-n ${NS}"
+    fi
 
-    wpod() {
-        NS=$@
-        NAMESPACE=${NS:-"--all-namespaces"}
-        if [ "$NAMESPACE" != "--all-namespaces" ]
-          then
-          NAMESPACE="-n ${NS}"
-        fi
+    watch kubectl get pods $NAMESPACE
+}
 
-        watch kubectl get pods $NAMESPACE
-    }
-
-## Kubernetes Pods commands
+kexec() {
+    POD=$1
+    INPUT_INDEX=$2
+    INDEX="${INPUT_INDEX:-1}"
+    PODS=`kubectl get pods --all-namespaces|grep ${POD} |head -${INDEX} |tail -1`
+    PODNAME=`echo ${PODS} |awk '{print $2}'`
+    echo "Pod: ${PODNAME}"
+    echo
+    NS=`echo ${PODS} |awk '{print $1}'`
+    kubectl exec -it --namespace=${NS} ${PODNAME} /bin/bash
+}
 
 alias ksvc='kubectl get services --all-namespaces'
 alias kpod='kubectl get pods --all-namespaces'
@@ -231,5 +215,3 @@ Follow logs:
     kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --user=admin --user=kubelet --group=system:serviceaccounts
 
     kubectl create clusterrolebinding add-on-cluster-account --clusterrole=cluster-admin --serviceaccount=default:default
-
-

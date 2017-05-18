@@ -5,9 +5,9 @@ metadata:
   namespace: default
 spec:
   rules:
-  - host: jenkins.kube.local
+  - host: jenkins.kube.com
     http:
       paths:
       -  backend:
           serviceName: jenkins-jenkins
-          servicePort: http
+          servicePort: 8080

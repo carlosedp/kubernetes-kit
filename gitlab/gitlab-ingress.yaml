@@ -5,7 +5,7 @@ metadata:
   namespace: default
 spec:
   rules:
-  - host: gitlab.kubelocal.com
+  - host: gitlab.kube.com
     http:
       paths:
       -  backend:

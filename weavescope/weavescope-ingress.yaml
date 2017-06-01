@@ -5,7 +5,7 @@ metadata:
   name: weave-scope-app
 spec:
   rules:
-  - host: scope.kube.local
+  - host: scope.kube.com
     http:
       paths:
       - backend:

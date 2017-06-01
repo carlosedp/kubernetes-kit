@@ -21,7 +21,7 @@ metadata:
   namespace: kube-system
 spec:
   rules:
-  - host: dashboard.kube.local
+  - host: dashboard.kube.com
     http:
       paths:
        - backend:

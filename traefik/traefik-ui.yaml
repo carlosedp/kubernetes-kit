@@ -36,7 +36,7 @@ metadata:
   namespace: kube-system
 spec:
   rules:
-  - host: traefik.kube.local
+  - host: traefik.kube.com
     http:
       paths:
       -  backend:

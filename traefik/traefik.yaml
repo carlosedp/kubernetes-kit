@@ -1,49 +1,11 @@
 ---
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  name: traefik-ingress-controller
-rules:
-  - apiGroups:
-      - ""
-    resources:
-      - pods
-      - services
-      - endpoints
-    verbs:
-      - get
-      - list
-      - watch
-  - apiGroups:
-      - extensions
-    resources:
-      - ingresses
-    verbs:
-      - get
-      - list
-      - watch
----
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: traefik-ingress-controller
   namespace: kube-system
 ---
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  name: traefik-ingress-controller
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: traefik-ingress-controller
-subjects:
-- kind: ServiceAccount
-  name: traefik-ingress-controller
-  namespace: kube-system
----
-apiVersion: v1
-kind: Deployment
+kind: DaemonSet
 apiVersion: extensions/v1beta1
 metadata:
   name: traefik-ingress-controller
@@ -51,10 +13,6 @@ metadata:
   labels:
     k8s-app: traefik-ingress-lb
 spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      k8s-app: traefik-ingress-lb
   template:
     metadata:
       labels:
@@ -80,25 +38,10 @@ spec:
           hostPort: 80
         - name: admin
           containerPort: 8081
+        securityContext:
+          privileged: true
         args:
+#        - -d
         - --web
         - --web.address=:8081
         - --kubernetes
-        - --logLevel=ERROR
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: traefik-ingress-controller
-  namespace: kube-system
-  labels:
-    k8s-app: traefik-ingress-lb
-spec:
-  type: NodePort
-  ports:
-    - port: 80
-      nodePort: 80
-      name: http
-  selector:
-    k8s-app: traefik-ingress-lb
-

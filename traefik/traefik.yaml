@@ -45,3 +45,19 @@ spec:
         - --web
         - --web.address=:8081
         - --kubernetes
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-ingress-controller
+  namespace: kube-system
+  labels:
+    k8s-app: traefik-ingress-lb
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      nodePort: 80
+      name: http
+  selector:
+    k8s-app: traefik-ingress-lb

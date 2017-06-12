@@ -37,8 +37,8 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: graphite-pvc
-#  annotations:
-#    volume.beta.kubernetes.io/storage-class: "default"
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "default"
 spec:
   accessModes:
     - ReadWriteOnce

@@ -1,0 +1,7 @@
+apiVersion: v1
+data:
+  10.178.11.241: kube-system/traefik-ingress-controller
+kind: ConfigMap
+metadata:
+  name: vip-configmap
+  namespace: default

@@ -3,14 +3,11 @@ kind: Service
 metadata:
   name: traefik-ingress-controller
   namespace: kube-system
-  labels:
-    k8s-app: traefik-ingress-lb
 spec:
-  ports:
-    - port: 80
-      name: http
-      protocol: TCP
-      targetPort: 80
   selector:
     k8s-app: traefik-ingress-lb
-
+  ports:
+  - port: 80
+    name: http
+    protocol: TCP
+    targetPort: 80

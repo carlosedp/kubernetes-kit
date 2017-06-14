@@ -7,13 +7,25 @@ metadata:
 spec:
   selector:
     k8s-app: traefik-ingress-lb
-#  type: NodePort
   ports:
-  - name: admin
-    port: 8081
+  - port: 8080
+    name: admin
     protocol: TCP
-    targetPort: 8081
-#    nodePort: 30082
+    targetPort: 8080
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: traefik-web-ui
+  namespace: kube-system
+spec:
+  rules:
+  - host: traefik.kube.com
+    http:
+      paths:
+      -  backend:
+          serviceName: traefik-web-ui
+          servicePort: admin
 ---
 #apiVersion: extensions/v1beta1
 #kind: Ingress
@@ -31,16 +43,3 @@ spec:
 #          serviceName: traefik-web-ui
 #          servicePort: admin
 ---
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: traefik-web-ui
-  namespace: kube-system
-spec:
-  rules:
-  - host: traefik.kube.com
-    http:
-      paths:
-      -  backend:
-          serviceName: traefik-web-ui
-          servicePort: admin

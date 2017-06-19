@@ -41,18 +41,18 @@
 
 ### Install addons
 
+* Deploy Traefik Ingress Controller and Traefik-ui from traefik dir
 * Deploy keepalived-vip from keepalived-vip dir. (Edit VIP in vip-configmap.yaml).
-* Deploy Ingress Controller Traefik and Traefik-ui from traefik dir
 * Deploy Kubernetes Dashboard from `kubectl create -f https://git.io/kube-dashboard`. Dashboard ingress (from dashboard dir)
 * Deploy Heapster (from dashboard dir)
 * Add local DNS server to DNS deployment (kubedns args `--nameservers=10.178.11.220`) or load `kubedns-configmap.yaml` (If not configured as server default DNS on resolv.conf).
-* Install Helm (if not installed by playbook)
 * Deploy NFS StorageClass from nfs-storageclass dir (NFS server must have no_root_squash)
 * Deploy InfluxDB from influx-grafana dir (influx.yaml)
+* Install Helm (if not installed by playbook)
 * Fix Helm RBAC permissions with:
     `kubectl create serviceaccount --namespace kube-system tiller`
     `kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller`
-    `kubectl edit deploy --namespace kube-system tiller-deploy #and add the line serviceAccount: tiller to spec/template/spec`
+    `kubectl edit deploy --namespace kube-system tiller-deploy #and add the line "serviceAccount: tiller" to spec/template/spec`
 * Deploy Grafana from Helm chart:
     `helm install --name grafana --set server.serviceType=NodePort --set server.persistentVolume.enabled=false --set server.installPlugins=raintank-kubernetes-app --set server.adminPassword=admin stable/grafana`
 * Deploy Grafana ingress from grafana-helm-ingress.yaml
@@ -63,11 +63,16 @@
       ```
       - Go to the Cluster List page via the Kubernetes app menu.
       - Click the New Cluster button.
-      - Fill in the Auth details for your cluster (ca.crt, apiserver-kubelet-client.crt and apiserver-kubelet-client.key from /etc/kubernetes/pki/)
+      - URL from "kubectl cluster-info", Access == proxy.
+      - Fill in the Auth details for your cluster (ca.crt, apiserver-kubelet-client.crt and apiserver-kubelet-client.key from /etc/kubernetes/pki/). Check "TLS Client Auth" and "With CA Cert".
       - Choose the Graphite datasource that will be used for reading data in the dashboards.
-      - Fill in the details for the Carbon host that is used to write to Graphite. This url has to be available from inside the cluster.
+      - Fill in the details for the Carbon host that is used to write to Graphite. This url has to be available from inside the cluster. (Due to a bug, use ClusterIP for the Graphite Write Server)
       - Click Deploy. This will deploy a DaemonSet, to collect health metrics for every node, and a pod that collects cluster metrics.
       ```
+      - Fix Snap permissions
+          `kubectl create serviceaccount --namespace kube-system snap`
+          `kubectl create clusterrolebinding snap-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:snap`
+          `kubectl edit deploy --namespace kube-system snap-kubestate-deployment` add `serviceAccount: tiller` to spec/template/spec
 
 * Deploy Weavescope from weavescope dir (optional)
 * Deploy Rook (optional for Ceph storage across all nodes)

@@ -46,7 +46,8 @@
 * Deploy Kubernetes Dashboard from `kubectl create -f https://git.io/kube-dashboard`. Dashboard ingress (from dashboard dir)
 * Deploy Heapster (from dashboard dir)
 * Add local DNS server to DNS deployment (kubedns args `--nameservers=10.178.11.220`) or load `kubedns-configmap.yaml` (If not configured as server default DNS on resolv.conf).
-* Deploy NFS StorageClass from nfs-storageclass dir (NFS server must have no_root_squash)
+* Deploy NFS StorageClass from nfs-storageclass dir (NFS server must have no_root_squash).
+* Set the StorageClass as default with `kubectl patch storageclass default -p '{"metadata":{"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'`.
 * Deploy InfluxDB from influx-grafana dir (influx.yaml)
 * Install Helm (if not installed by playbook)
 * Fix Helm RBAC permissions with:
@@ -82,7 +83,7 @@
     # Repeat this step for all namespaces you want to deploy PersistentVolumes with Rook in
     kubectl get secret rook-rook-user -oyaml | sed "/resourceVer/d;/uid/d;/self/d;/creat/d;/namespace/d" | kubectl -n kube-system apply -f -
     # In order to make Rook the default Storage Provider by making the `rook-block` Storage Class the default, run this:
-    kubectl patch storageclass rook-block -p '{"metadata":{"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
+    `kubectl patch storageclass rook-block -p '{"metadata":{"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'`
 * Deploy Cinder StorageClass from cinder-storageclass dir (depends on Kubernetes 1.7)
 
 ### References:

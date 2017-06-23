@@ -1,0 +1,44 @@
+apiVersion: v1
+data:
+  carbon.conf: "[cache]\nLOCAL_DATA_DIR = /var/lib/graphite/storage/whisper/\n\n#
+    Specify the user to drop privileges to\n# If this is blank carbon runs as the
+    user that invokes it\n# This user must have write access to the local data directory\nUSER
+    = \n\n# Limit the size of the cache to avoid swapping or becoming CPU bound.\n#
+    Sorts and serving cache queries gets more expensive as the cache grows.\n# Use
+    the value \"inf\" (infinity) for an unlimited cache size.\nMAX_CACHE_SIZE = inf\n\n#
+    Limits the number of whisper update_many() calls per second, which effectively\n#
+    means the number of write requests sent to the disk. This is intended to\n# prevent
+    over-utilizing the disk and thus starving the rest of the system.\n# When the
+    rate of required updates exceeds this, then carbon's caching will\n# take effect
+    and increase the overall throughput accordingly.\nMAX_UPDATES_PER_SECOND = 100\n\n#
+    Softly limits the number of whisper files that get created each minute.\n# Setting
+    this value low (like at 50) is a good way to ensure your graphite\n# system will
+    not be adversely impacted when a bunch of new metrics are\n# sent to it. The trade
+    off is that it will take much longer for those metrics'\n# database files to all
+    get created and thus longer until the data becomes usable.\n# Setting this value
+    high (like \"inf\" for infinity) will cause graphite to create\n# the files quickly
+    but at the risk of slowing I/O down considerably for a while.\nMAX_CREATES_PER_MINUTE
+    = 50\n\nLINE_RECEIVER_INTERFACE = 0.0.0.0\nLINE_RECEIVER_PORT = 2003\n\nENABLE_UDP_LISTENER
+    = True\nUDP_RECEIVER_INTERFACE = 0.0.0.0\nUDP_RECEIVER_PORT = 2003\n\nPICKLE_RECEIVER_INTERFACE
+    = 0.0.0.0\nPICKLE_RECEIVER_PORT = 2004\n\nCACHE_QUERY_INTERFACE = 0.0.0.0\nCACHE_QUERY_PORT
+    = 7002\n\nLOG_UPDATES = False\n\n# Enable AMQP if you want to receve metrics using
+    an amqp broker\n# ENABLE_AMQP = False\n\n# Verbose means a line will be logged
+    for every metric received\n# useful for testing\n# AMQP_VERBOSE = False\n\n# AMQP_HOST
+    = localhost\n# AMQP_PORT = 5672\n# AMQP_VHOST = /\n# AMQP_USER = guest\n# AMQP_PASSWORD
+    = guest\n# AMQP_EXCHANGE = graphite\n\n# Patterns for all of the metrics this
+    machine will store. Read more at\n# http://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol#Bindings\n#\n#
+    Example: store all sales, linux servers, and utilization metrics\n# BIND_PATTERNS
+    = sales.#, servers.linux.#, #.utilization\n#\n# Example: store everything\n# BIND_PATTERNS
+    = #\n\n# NOTE: you cannot run both a cache and a relay on the same server\n# with
+    the default configuration, you have to specify a distinict\n# interfaces and ports
+    for the listeners.\n\n[relay]\nLINE_RECEIVER_INTERFACE = 0.0.0.0\nLINE_RECEIVER_PORT
+    = 2003\n\nPICKLE_RECEIVER_INTERFACE = 0.0.0.0\nPICKLE_RECEIVER_PORT = 2004\n\nCACHE_SERVERS
+    = server1, server2, server3\nMAX_QUEUE_SIZE = 10000\n"
+kind: ConfigMap
+metadata:
+  creationTimestamp: 2017-06-19T20:23:36Z
+  name: graphite-carbon-conf
+  namespace: default
+  resourceVersion: "577541"
+  selfLink: /api/v1/namespaces/default/configmaps/graphite-carbon-conf
+  uid: 2c75c09d-552d-11e7-95bc-fa163e5e86fb

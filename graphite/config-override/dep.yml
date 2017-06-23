@@ -1,0 +1,53 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: graphite
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: graphite
+    spec:
+      containers:
+        - name: graphite
+          image: carlosedp/docker-graphite
+          ports:
+          - containerPort: 80
+            name: http
+            protocol: TCP
+          - containerPort: 2003
+            name: incoming
+            protocol: TCP
+          - containerPort: 2004
+            name: incoming-pickle
+            protocol: TCP
+          - containerPort: 7002
+            name: query
+            protocol: TCP
+          volumeMounts:
+          - name: graphite-pv
+            mountPath: /var/lib/graphite/storage/whisper
+          - name: graphite-supervisord
+            mountPath: /etc/supervisor/conf.d/supervisord.conf
+            subPath: supervisord.conf
+      volumes:
+        - name: graphite-pv
+          persistentVolumeClaim:
+            claimName: graphite-pvc
+        - name: graphite-supervisord
+          configMap:
+            name: graphite-supervisord.conf
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: graphite-pvc
+#  annotations:
+#    volume.beta.kubernetes.io/storage-class: "default"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi

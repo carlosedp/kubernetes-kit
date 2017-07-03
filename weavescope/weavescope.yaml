@@ -45,7 +45,7 @@ items:
         spec:
           containers:
             - name: app
-              image: 'weaveworks/scope:1.3.0'
+              image: 'weaveworks/scope:1.5.0'
               imagePullPolicy: IfNotPresent
               args:
                 - '--no-probe'
@@ -116,7 +116,7 @@ items:
         spec:
           containers:
             - name: agent
-              image: 'weaveworks/scope:1.3.0'
+              image: 'weaveworks/scope:1.5.0'
               imagePullPolicy: IfNotPresent
               args:
                 - '--no-app'

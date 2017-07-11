@@ -67,7 +67,7 @@
       - URL from "kubectl cluster-info", Access == proxy.
       - Fill in the Auth details for your cluster (ca.crt, apiserver-kubelet-client.crt and apiserver-kubelet-client.key from /etc/kubernetes/pki/). Check "TLS Client Auth" and "With CA Cert".
       - Choose the Graphite datasource that will be used for reading data in the dashboards.
-      - Fill in the details for the Carbon host that is used to write to Graphite. This url has to be available from inside the cluster. (Due to a bug, use ClusterIP for the Graphite Write Server)
+      - Fill in the details for the Carbon host that is used to write to Graphite. Use ClusterIP for the Graphite Write Server
       - Click Deploy. This will deploy a DaemonSet, to collect health metrics for every node, and a pod that collects cluster metrics.
       ```
       - Fix Snap permissions

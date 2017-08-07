@@ -80,9 +80,9 @@
     kubectl apply -f https://raw.githubusercontent.com/rook/rook/master/demo/kubernetes/rook-operator.yaml
     kubectl apply -f https://raw.githubusercontent.com/rook/rook/master/demo/kubernetes/rook-cluster.yaml
     kubectl apply -f https://raw.githubusercontent.com/rook/rook/master/demo/kubernetes/rook-storageclass.yaml
-    # Repeat this step for all namespaces you want to deploy PersistentVolumes with Rook in
+    `# Repeat this step for all namespaces you want to deploy PersistentVolumes with Rook in`
     kubectl get secret rook-rook-user -oyaml | sed "/resourceVer/d;/uid/d;/self/d;/creat/d;/namespace/d" | kubectl -n kube-system apply -f -
-    # In order to make Rook the default Storage Provider by making the `rook-block` Storage Class the default, run this:
+    `# In order to make Rook the default Storage Provider by making the `rook-block` Storage Class the default, run this:`
     `kubectl patch storageclass rook-block -p '{"metadata":{"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'`
 * Deploy Cinder StorageClass from cinder-storageclass dir (depends on Kubernetes 1.7)
 
@@ -95,22 +95,23 @@
 
 ### Directory listing
 
-`cinder-storageclass` - Creates a Openstack Cinder StorageClass (Depends on 1.7)
-`configmap-overlap-example` - Example of overlapping an existing file with a `ConfigMap file.
-`dashboard` - Kubernetes Dashboard/Heapster deployment with ingress.
-`gitlab` - Gitlab deployment with ingress.
-`grafana-helm-ingress.yaml` - Ingress file for the Helm Grafana deployment.
-`graphite` - Graphite deployment for the Kubernetes-Grafana plugin.
-`influx` - Influx database deployment.
-`jenkins` - Jenkins deployment with ingress.
-`keepalived-vip` - Keepalived deployment to create a VIP on all Kubernetes nodes.
-`kubedns-configmap.yaml` - Kubedns ConfigMap to allow alternate upstream DNS `server.
-`nfs-pv-pvc` - NFS PersistentVolume and PersistentVolumeClass example deployment.
-`nfs-storageclass` - NFS StorageClass.
-`nginx-lb` - Nginx deployment example with LoadBalancer.
-`openstack.conf` - Config to allow integration to Openstack cloud provider.
-`traefik` - Traefik Ingress controller deployment
-`weavescope` - Weavescope monitoring deployment
+   `cinder-storageclass` - Creates a Openstack Cinder StorageClass (Depends on 1.7)
+   `configmap-overlap-example` - Example of overlapping an existing file with a `ConfigMap file.
+   `dashboard` - Kubernetes Dashboard/Heapster deployment with ingress.
+   `gitlab` - Gitlab deployment with ingress.
+   `grafana-helm-ingress.yaml` - Ingress file for the Helm Grafana deployment.
+   `graphite` - Graphite deployment for the Kubernetes-Grafana plugin.
+   `influx` - Influx database deployment.
+   `jenkins` - Jenkins deployment with ingress.
+   `keepalived-vip` - Keepalived deployment to create a VIP on all Kubernetes nodes.
+   `kubedns-configmap.yaml` - Kubedns ConfigMap to allow alternate upstream DNS `server.
+   `nfs-pv-pvc` - NFS PersistentVolume and PersistentVolumeClass example deployment.
+   `nfs-storageclass` - NFS StorageClass.
+   `nginx-lb` - Nginx deployment example with LoadBalancer.
+   `openstack.conf` - Config to allow integration to Openstack cloud provider.
+   `traefik` - Traefik Ingress controller deployment
+   `weavescope` - Weavescope monitoring deployment
+
 ------------------------------------------------------------------------------
 
 # Command Aliases/Funtions in .bashrc
